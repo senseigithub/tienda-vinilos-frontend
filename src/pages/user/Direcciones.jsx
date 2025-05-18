@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import logo from '../../assets/logo.png';
 
 export default function Direcciones() {
   const [direcciones, setDirecciones] = useState([]);
@@ -32,6 +33,10 @@ export default function Direcciones() {
   };
 
   const handleUpdate = async (id) => {
+    if (!form.direccion || !form.ciudad || !form.codigo_postal || !form.telefono) {
+      alert('Por favor completa todos los campos antes de guardar.');
+      return;
+    }
     const token = localStorage.getItem('token');
     const res = await fetch(`http://localhost:8000/api/direcciones-envio/${id}`, {
       method: 'PUT',
@@ -49,6 +54,10 @@ export default function Direcciones() {
   };
 
   const handleAdd = async () => {
+    if (!form.direccion || !form.ciudad || !form.codigo_postal || !form.telefono) {
+      alert('Por favor completa todos los campos antes de guardar.');
+      return;
+    }
     const token = localStorage.getItem('token');
     const usuario = JSON.parse(localStorage.getItem('usuario'));
     const res = await fetch(`http://localhost:8000/api/direcciones-envio`, {
@@ -77,60 +86,66 @@ export default function Direcciones() {
   };
 
   return (
-    <div className="p-6 max-w-3xl mx-auto">
-      <h1 className="text-2xl font-bold mb-6 text-gray-800">Direcciones de Envío</h1>
-      {direcciones.map((dir, index) => (
-        <div key={dir.id} className="mb-6 p-4 bg-white shadow rounded">
-          {editIndex === index ? (
-            <>
-              <input name="direccion" value={form.direccion} onChange={handleChange} className="mb-2 w-full p-2 border rounded" />
-              <input name="ciudad" value={form.ciudad} onChange={handleChange} className="mb-2 w-full p-2 border rounded" />
-              <input name="codigo_postal" value={form.codigo_postal} onChange={handleChange} className="mb-2 w-full p-2 border rounded" />
-              <input name="telefono" value={form.telefono} onChange={handleChange} className="mb-2 w-full p-2 border rounded" />
-              <div className="flex gap-2">
-                <button onClick={() => handleUpdate(dir.id)} className="bg-black text-white px-4 py-2 rounded hover:bg-gray-900">
-                  Guardar cambios
-                </button>
-                <button onClick={() => setEditIndex(null)} className="text-sm text-gray-600 hover:underline">
-                  Cancelar
-                </button>
-              </div>
-            </>
+    <div className="min-h-screen bg-white flex flex-col items-center py-12 px-4 sm:px-6 lg:px-8">
+      <div className="w-full max-w-3xl bg-white border border-orange-400 shadow-lg rounded-2xl p-8">
+        <div className="flex flex-col items-center mb-6">
+          <img src={logo} alt="Logo" className="w-32 h-auto mb-4" />
+          <h1 className="text-3xl font-bold text-black">Direcciones de Envío</h1>
+        </div>
+
+        {direcciones.map((dir, index) => (
+          <div key={dir.id} className="mb-6 p-5 bg-white border border-orange-400 shadow rounded-xl">
+            {editIndex === index ? (
+              <>
+                <input name="direccion" value={form.direccion} onChange={handleChange} placeholder="Dirección" className="mb-2 w-full p-2 border rounded text-black" />
+                <input name="ciudad" value={form.ciudad} onChange={handleChange} placeholder="Ciudad" className="mb-2 w-full p-2 border rounded text-black" />
+                <input name="codigo_postal" value={form.codigo_postal} onChange={handleChange} placeholder="Código Postal" className="mb-2 w-full p-2 border rounded text-black" />
+                <input name="telefono" value={form.telefono} onChange={handleChange} placeholder="Teléfono" className="mb-2 w-full p-2 border rounded text-black" />
+                <div className="flex gap-2">
+                  <button onClick={() => handleUpdate(dir.id)} className="px-4 py-2 border-2 border-black bg-[#FFA500] text-black font-semibold rounded-full hover:scale-105 hover:bg-[#FF8C00] transition-transform">
+                    Guardar cambios
+                  </button>
+                  <button onClick={() => setEditIndex(null)} className="text-sm text-gray-600 hover:underline">
+                    Cancelar
+                  </button>
+                </div>
+              </>
+            ) : (
+              <>
+                <p className="text-black"><strong>Dirección:</strong> {dir.direccion}</p>
+                <p className="text-black"><strong>Ciudad:</strong> {dir.ciudad}</p>
+                <p className="text-black"><strong>Código Postal:</strong> {dir.codigo_postal}</p>
+                <p className="text-black"><strong>Teléfono:</strong> {dir.telefono}</p>
+                <div className="flex gap-4 mt-2">
+                  <button onClick={() => handleEdit(dir, index)} className="px-4 py-1 border-2 border-black bg-[#FFA500] text-black font-semibold rounded-full hover:scale-105 hover:bg-[#FF8C00] transition-transform text-sm">
+                    Editar
+                  </button>
+                  <button onClick={() => handleDelete(dir.id)} className="px-4 py-1 border-2 border-black bg-red-500 text-white font-semibold rounded-full hover:scale-105 hover:bg-red-600 transition-transform text-sm">
+                    Eliminar
+                  </button>
+                </div>
+              </>
+            )}
+          </div>
+        ))}
+
+        <div className="mt-8">
+          {!addingNew ? (
+            <button onClick={() => setAddingNew(true)} className="text-sm text-orange-600 hover:underline font-medium">
+              + Añadir nueva dirección
+            </button>
           ) : (
-            <>
-              <p><strong>Dirección:</strong> {dir.direccion}</p>
-              <p><strong>Ciudad:</strong> {dir.ciudad}</p>
-              <p><strong>Código Postal:</strong> {dir.codigo_postal}</p>
-              <p><strong>Teléfono:</strong> {dir.telefono}</p>
-              <div className="flex gap-4 mt-2">
-                <button onClick={() => handleEdit(dir, index)} className="text-sm text-blue-600 hover:underline">
-                  Editar
-                </button>
-                <button onClick={() => handleDelete(dir.id)} className="text-sm text-red-600 hover:underline">
-                  Eliminar
-                </button>
-              </div>
-            </>
+            <div className="mt-4 p-5 bg-white border border-orange-400 shadow rounded-xl">
+              <input name="direccion" value={form.direccion} onChange={handleChange} placeholder="Dirección" className="mb-2 w-full p-2 border rounded text-black" />
+              <input name="ciudad" value={form.ciudad} onChange={handleChange} placeholder="Ciudad" className="mb-2 w-full p-2 border rounded text-black" />
+              <input name="codigo_postal" value={form.codigo_postal} onChange={handleChange} placeholder="Código Postal" className="mb-2 w-full p-2 border rounded text-black" />
+              <input name="telefono" value={form.telefono} onChange={handleChange} placeholder="Teléfono" className="mb-4 w-full p-2 border rounded text-black" />
+              <button onClick={handleAdd} className="px-4 py-2 border-2 border-black bg-[#FFA500] text-black font-semibold rounded-full hover:scale-105 hover:bg-[#FF8C00] transition-transform">
+                Guardar dirección
+              </button>
+            </div>
           )}
         </div>
-      ))}
-
-      <div className="mt-8">
-        {!addingNew ? (
-          <button onClick={() => setAddingNew(true)} className="text-sm text-blue-700 hover:underline">
-            + Añadir nueva dirección
-          </button>
-        ) : (
-          <div className="mt-4 p-4 bg-gray-50 border rounded">
-            <input name="direccion" value={form.direccion} onChange={handleChange} placeholder="Dirección" className="mb-2 w-full p-2 border rounded" />
-            <input name="ciudad" value={form.ciudad} onChange={handleChange} placeholder="Ciudad" className="mb-2 w-full p-2 border rounded" />
-            <input name="codigo_postal" value={form.codigo_postal} onChange={handleChange} placeholder="Código Postal" className="mb-2 w-full p-2 border rounded" />
-            <input name="telefono" value={form.telefono} onChange={handleChange} placeholder="Teléfono" className="mb-2 w-full p-2 border rounded" />
-            <button onClick={handleAdd} className="bg-black text-white px-4 py-2 rounded hover:bg-gray-900">
-              Guardar dirección
-            </button>
-          </div>
-        )}
       </div>
     </div>
   );

@@ -6,6 +6,8 @@ export default function Pedidos() {
 
   useEffect(() => {
     const token = localStorage.getItem('token');
+    const usuario = JSON.parse(localStorage.getItem('usuario'));
+
     fetch('http://localhost:8000/api/pedidos', {
       headers: {
         Authorization: `Bearer ${token}`,
@@ -13,8 +15,9 @@ export default function Pedidos() {
     })
       .then((res) => res.json())
       .then(async (data) => {
+        const propios = data.filter((pedido) => pedido.usuario_id === usuario.id);
         const withDetalles = await Promise.all(
-          data.map(async (pedido) => {
+          propios.map(async (pedido) => {
             const detallesRes = await fetch(`http://localhost:8000/api/detalles-pedido?pedido_id=${pedido.id}`, {
               headers: {
                 Authorization: `Bearer ${token}`,
@@ -59,7 +62,7 @@ export default function Pedidos() {
         <p className="text-gray-600">No tienes pedidos aún.</p>
       ) : (
         pedidos.map((pedido) => (
-          <div key={pedido.id} className="mb-6 p-5 bg-white border rounded-lg shadow-sm">
+          <div key={pedido.id} className="mb-6 p-5 bg-white border border-orange-400 rounded-xl shadow">
             <div className="flex justify-between items-center mb-2">
               <div>
                 <p className="text-sm text-gray-500">Pedido #{pedido.id}</p>
@@ -96,13 +99,13 @@ export default function Pedidos() {
               <div className="mt-4 space-x-4">
                 <button
                   onClick={() => actualizarEstadoPedido(pedido.id, 'Cancelado')}
-                  className="text-sm text-red-600 hover:underline"
+                  className="px-4 py-2 border-2 border-black bg-red-500 text-white font-semibold rounded-full hover:scale-105 hover:bg-red-600 transition-transform text-sm"
                 >
                   Cancelar pedido
                 </button>
                 <button
                   onClick={() => actualizarEstadoPedido(pedido.id, 'Completado')}
-                  className="text-sm text-green-600 hover:underline"
+                  className="px-4 py-2 border-2 border-black bg-[#FFA500] text-black font-semibold rounded-full hover:scale-105 hover:bg-[#FF8C00] transition-transform text-sm"
                 >
                   Me ha llegado
                 </button>

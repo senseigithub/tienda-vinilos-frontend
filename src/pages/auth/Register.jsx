@@ -1,4 +1,6 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import logo from '../../assets/logo.png';
 
 export default function Register() {
   const [form, setForm] = useState({
@@ -7,8 +9,13 @@ export default function Register() {
     dnie: '',
     email: '',
     password: '',
+    confirmar: '',
     telefono: ''
   });
+  const [error, setError] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
+  const navigate = useNavigate();
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -16,6 +23,14 @@ export default function Register() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (Object.values(form).some(val => !val)) {
+      setError('Por favor, completa todos los campos.');
+      return;
+    }
+    if (form.password !== form.confirmar) {
+      setError('Las contraseñas no coinciden.');
+      return;
+    }
     try {
       const res = await fetch('http://localhost:8000/api/register', {
         method: 'POST',
@@ -29,26 +44,40 @@ export default function Register() {
       localStorage.setItem('token', data.token);
       localStorage.setItem('usuario', JSON.stringify(data.usuario));
 
-      alert('Registro exitoso');
+      navigate('/');
+      window.location.reload();
     } catch (err) {
-      alert('Error: ' + err.message);
+      setError('Error: ' + err.message);
     }
   };
 
   return (
-    <div className="p-6 max-w-md mx-auto">
-      <h1 className="text-xl font-bold mb-4">Registro de usuario</h1>
-      <form onSubmit={handleSubmit} className="space-y-3">
-        <input name="nombre" type="text" placeholder="Nombre" value={form.nombre} onChange={handleChange} className="w-full p-2 border rounded" />
-        <input name="apellidos" type="text" placeholder="Apellidos" value={form.apellidos} onChange={handleChange} className="w-full p-2 border rounded" />
-        <input name="dnie" type="text" placeholder="DNI/NIE" value={form.dnie} onChange={handleChange} className="w-full p-2 border rounded" />
-        <input name="email" type="email" placeholder="Correo" value={form.email} onChange={handleChange} className="w-full p-2 border rounded" />
-        <input name="password" type="password" placeholder="Contraseña" value={form.password} onChange={handleChange} className="w-full p-2 border rounded" />
-        <input name="telefono" type="text" placeholder="Teléfono" value={form.telefono} onChange={handleChange} className="w-full p-2 border rounded" />
-        <button type="submit" className="w-full bg-black text-white py-2 rounded">
-          Registrarse
-        </button>
-      </form>
+    <div className="min-h-screen bg-white flex flex-col items-center justify-center px-4 py-12">
+      <div className="w-full max-w-lg bg-white border border-orange-400 shadow-lg rounded-2xl p-8">
+        <div className="flex flex-col items-center mb-6">
+          <img src={logo} alt="Logo" className="w-32 h-auto mb-4" />
+          <h1 className="text-3xl font-bold text-black">Registro de usuario</h1>
+        </div>
+        <form onSubmit={handleSubmit} className="space-y-3">
+          <input name="nombre" type="text" placeholder="Nombre" value={form.nombre} onChange={handleChange} className="w-full p-3 border border-gray-300 rounded text-black" />
+          <input name="apellidos" type="text" placeholder="Apellidos" value={form.apellidos} onChange={handleChange} className="w-full p-3 border border-gray-300 rounded text-black" />
+          <input name="dnie" type="text" placeholder="DNI/NIE" value={form.dnie} onChange={handleChange} className="w-full p-3 border border-gray-300 rounded text-black" />
+          <input name="email" type="email" placeholder="Correo" value={form.email} onChange={handleChange} className="w-full p-3 border border-gray-300 rounded text-black" />
+          <div className="relative">
+            <input name="password" type={showPassword ? 'text' : 'password'} placeholder="Contraseña" value={form.password} onChange={handleChange} className="w-full p-3 border border-gray-300 rounded text-black" />
+            <span onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-3 cursor-pointer text-sm text-orange-600">{showPassword ? '🙈' : '👁️'}</span>
+          </div>
+          <div className="relative">
+            <input name="confirmar" type={showConfirm ? 'text' : 'password'} placeholder="Confirmar contraseña" value={form.confirmar} onChange={handleChange} className="w-full p-3 border border-gray-300 rounded text-black" />
+            <span onClick={() => setShowConfirm(!showConfirm)} className="absolute right-3 top-3 cursor-pointer text-sm text-orange-600">{showConfirm ? '🙈' : '👁️'}</span>
+          </div>
+          <input name="telefono" type="text" placeholder="Teléfono" value={form.telefono} onChange={handleChange} className="w-full p-3 border border-gray-300 rounded text-black" />
+          {error && <p className="text-red-600 text-sm">{error}</p>}
+          <button type="submit" className="w-full px-4 py-2 border-2 border-black bg-[#FFA500] text-black font-semibold rounded-full hover:scale-105 hover:bg-[#FF8C00] transition-transform">
+            Registrarse
+          </button>
+        </form>
+      </div>
     </div>
   );
 }

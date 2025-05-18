@@ -116,12 +116,6 @@ export default function Navbar() {
                       Mi perfil
                     </Link>
                     <Link
-                      to="/editar-perfil"
-                      className="block px-4 py-2 text-sm text-black hover:bg-gray-100"
-                    >
-                      Editar perfil
-                    </Link>
-                    <Link
                       to="/direcciones"
                       className="block px-4 py-2 text-sm text-black hover:bg-gray-100"
                     >
