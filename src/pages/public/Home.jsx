@@ -1,9 +1,10 @@
 import { useEffect, useState } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 export default function Home() {
   const [vinilos, setVinilos] = useState([]);
   const location = useLocation();
+  const navigate = useNavigate();
 
   useEffect(() => {
     const params = new URLSearchParams(location.search);
@@ -72,24 +73,32 @@ export default function Home() {
           <p className="text-gray-500">No se encontraron vinilos.</p>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
-            {vinilos.map((vinilo) => (
+            {vinilos.map((vinilo, i) => (
               <div
                 key={vinilo.id}
-                className="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-lg transition duration-300"
+                className="bg-white rounded-2xl shadow-md overflow-hidden hover:shadow-xl transform hover:-translate-y-1 transition duration-300 ease-in-out animate-fade-in"
+                style={{ animationDelay: `${i * 100}ms`, animationFillMode: 'both' }}
               >
                 <img
                   src={vinilo.imagen}
                   alt={vinilo.titulo}
-                  className="w-full h-48 object-cover"
+                  className="w-full h-48 object-cover cursor-pointer"
+                  onClick={() => navigate(`/vinilo/${vinilo.id}`)}
                 />
                 <div className="p-4">
-                  <h2 className="text-lg font-bold text-gray-900">{vinilo.titulo}</h2>
+                  <h2
+                    className="text-lg font-bold text-gray-900 cursor-pointer hover:underline"
+                    onClick={() => navigate(`/vinilo/${vinilo.id}`)}
+                  >
+                    {vinilo.titulo}
+                  </h2>
                   <p className="text-sm text-gray-500 mb-1">{vinilo.artista} · {vinilo.genero}</p>
                   <p className="text-xl font-semibold text-black">{vinilo.precio} €</p>
                   <button
                     onClick={() => añadirAlCarrito(vinilo)}
-                    className="mt-3 w-full py-2 bg-black text-white rounded hover:bg-gray-900"
+                    className="mt-3 w-full py-1.5 px-2 text-sm border-2 border-black bg-black text-white font-medium rounded-md hover:bg-[#FFA500] hover:text-black transition-all flex items-center justify-center gap-2"
                   >
+                    <img src="/src/assets/carrito.svg" alt="Carrito" className="w-4 h-4" />
                     Añadir al carrito
                   </button>
                 </div>
@@ -98,6 +107,16 @@ export default function Home() {
           </div>
         )}
       </div>
+
+      <style>{`
+        @keyframes fade-in {
+          from { opacity: 0; transform: scale(0.95); }
+          to { opacity: 1; transform: scale(1); }
+        }
+        .animate-fade-in {
+          animation: fade-in 0.4s ease-in forwards;
+        }
+      `}</style>
     </section>
   );
 }

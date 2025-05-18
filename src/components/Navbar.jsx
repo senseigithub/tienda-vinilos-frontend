@@ -84,7 +84,7 @@ export default function Navbar() {
               onClick={() => setSidebarAbierto(true)}
             >
               <span className="text-xl text-gray-700 hover:text-orange-500">
-                🛒
+                <img src="/src/assets/carrito.svg" alt="Carrito" className="w-8 h-8" />
               </span>
               {carritoCount > 0 && (
                 <span className="absolute -top-2 -right-2 bg-orange-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
@@ -106,7 +106,13 @@ export default function Navbar() {
                 onMouseEnter={handleMouseEnter}
                 onMouseLeave={handleMouseLeave}
               >
-                <span className="text-xl cursor-pointer text-gray-800">👤</span>
+                <span className="text-xl cursor-pointer text-gray-800">
+                  <img
+                    src="/src/assets/perfil.svg"
+                    alt="Perfil"
+                    className="w-8 h-8"
+                  />
+                </span>
                 {openDropdown && (
                   <div className="absolute right-0 mt-2 w-44 bg-white border-2 border-orange-500 rounded shadow-md z-50">
                     <Link

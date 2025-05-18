@@ -23,19 +23,39 @@ export default function Register() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const dniRegex = /^\d{8}[A-HJ-NP-TV-Z]$/i;
+    const phoneRegex = /^\d{9}$/;
+
     if (Object.values(form).some(val => !val)) {
       setError('Por favor, completa todos los campos.');
+      return;
+    }
+    if (!emailRegex.test(form.email)) {
+      setError('Introduce un correo electrónico válido.');
+      return;
+    }
+    if (!dniRegex.test(form.dnie)) {
+      setError('Introduce un DNI válido (8 números y una letra).');
+      return;
+    }
+    if (!phoneRegex.test(form.telefono)) {
+      setError('Introduce un número de teléfono válido (9 dígitos).');
       return;
     }
     if (form.password !== form.confirmar) {
       setError('Las contraseñas no coinciden.');
       return;
     }
+
+    const { confirmar, ...datosAEnviar } = form;
+
     try {
       const res = await fetch('http://localhost:8000/api/register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(form)
+        body: JSON.stringify(datosAEnviar)
       });
 
       if (!res.ok) throw new Error('Registro fallido');
