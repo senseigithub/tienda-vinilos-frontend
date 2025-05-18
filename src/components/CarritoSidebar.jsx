@@ -1,7 +1,7 @@
 import { useEffect, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 
-export default function CarritoSidebar({ open, onClose }) {
+export default function CarritoSidebar({ open, onClose, onUpdateCarrito }) {
   const [carrito, setCarrito] = useState([]);
   const sidebarRef = useRef(null);
   const navigate = useNavigate();
@@ -42,6 +42,9 @@ export default function CarritoSidebar({ open, onClose }) {
       body: JSON.stringify({ carrito: usuario.carrito }),
     });
     setCarrito(nuevo);
+    if (onUpdateCarrito) {
+      onUpdateCarrito(nuevo);
+    }
   };
 
   const cambiarCantidad = (index, cantidad) => {

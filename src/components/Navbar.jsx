@@ -37,7 +37,8 @@ export default function Navbar() {
   const handleLogout = () => {
     localStorage.removeItem("token");
     localStorage.removeItem("usuario");
-    navigate("/login");
+    navigate("/");
+    window.location.reload(); // fuerza el recargado completo
   };
 
   const handleSearch = (value) => {
@@ -60,7 +61,10 @@ export default function Navbar() {
     <>
       <nav className="bg-white text-gray-900 border-b border-gray-200 sticky top-0 z-50 shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex flex-col sm:flex-row items-center justify-between gap-4">
-          <Link to="/" className="flex items-center gap-2 text-gray-900 hover:text-black">
+          <Link
+            to="/"
+            className="flex items-center gap-2 text-gray-900 hover:text-black"
+          >
             <img src={logo} alt="Logo" className="h-25 w-auto" />
           </Link>
 
@@ -75,8 +79,13 @@ export default function Navbar() {
           </div>
 
           <div className="relative flex items-center gap-4">
-            <div className="relative cursor-pointer" onClick={() => setSidebarAbierto(true)}>
-              <span className="text-xl text-gray-700 hover:text-orange-500">🛒</span>
+            <div
+              className="relative cursor-pointer"
+              onClick={() => setSidebarAbierto(true)}
+            >
+              <span className="text-xl text-gray-700 hover:text-orange-500">
+                🛒
+              </span>
               {carritoCount > 0 && (
                 <span className="absolute -top-2 -right-2 bg-orange-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
                   {carritoCount}
@@ -85,12 +94,12 @@ export default function Navbar() {
             </div>
 
             {!usuario ? (
-              <Link
-                to="/register"
-                className="text-sm font-medium text-gray-800 hover:underline"
+              <button
+                onClick={() => navigate("/login")}
+                className="px-4 py-2 border-2 border-black bg-[#FFA500] text-black font-semibold rounded-full hover:scale-105 hover:bg-[#FF8C00] transition-transform"
               >
-                Registrarte
-              </Link>
+                Login
+              </button>
             ) : (
               <div
                 className="relative"
@@ -99,36 +108,36 @@ export default function Navbar() {
               >
                 <span className="text-xl cursor-pointer text-gray-800">👤</span>
                 {openDropdown && (
-                  <div className="absolute right-0 mt-2 w-44 bg-white border border-gray-200 rounded shadow-md z-50">
+                  <div className="absolute right-0 mt-2 w-44 bg-white border-2 border-orange-500 rounded shadow-md z-50">
                     <Link
                       to="/perfil"
-                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                      className="block px-4 py-2 text-sm text-black hover:bg-gray-100"
                     >
-                      🧍 Mi perfil
+                      Mi perfil
                     </Link>
                     <Link
                       to="/editar-perfil"
-                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                      className="block px-4 py-2 text-sm text-black hover:bg-gray-100"
                     >
-                      🛠 Editar perfil
+                      Editar perfil
                     </Link>
                     <Link
                       to="/direcciones"
-                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                      className="block px-4 py-2 text-sm text-black hover:bg-gray-100"
                     >
-                      📦 Direcciones de envío
+                      Direcciones de envío
                     </Link>
                     <Link
                       to="/pedidos"
-                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                      className="block px-4 py-2 text-sm text-black hover:bg-gray-100"
                     >
-                      🏠 Mis pedidos
+                      Mis pedidos
                     </Link>
                     <button
                       onClick={handleLogout}
                       className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100"
                     >
-                      🚪 Cerrar sesión
+                      Cerrar sesión
                     </button>
                   </div>
                 )}
@@ -137,7 +146,10 @@ export default function Navbar() {
           </div>
         </div>
       </nav>
-      <CarritoSidebar open={sidebarAbierto} onClose={() => setSidebarAbierto(false)} />
+      <CarritoSidebar
+        open={sidebarAbierto}
+        onClose={() => setSidebarAbierto(false)}
+      />
     </>
   );
 }
