@@ -84,7 +84,7 @@ export default function Home() {
                 />
                 <div className="p-4">
                   <h2 className="text-lg font-bold text-gray-900">{vinilo.titulo}</h2>
-                  <p className="text-sm text-gray-500 mb-1">{vinilo.artista}</p>
+                  <p className="text-sm text-gray-500 mb-1">{vinilo.artista} · {vinilo.genero}</p>
                   <p className="text-xl font-semibold text-black">{vinilo.precio} €</p>
                   <button
                     onClick={() => añadirAlCarrito(vinilo)}
