@@ -10,6 +10,10 @@ export default function ViniloDetalle() {
   const [editandoId, setEditandoId] = useState(null);
   const [comentarioEditado, setComentarioEditado] = useState("");
 
+  const usuario = JSON.parse(localStorage.getItem("usuario"));
+  const usuarioId = usuario?.id;
+  const isAdmin = usuario?.rol === "admin";
+
   useEffect(() => {
     fetch(`http://localhost:8000/api/vinilos/${id}`)
       .then((res) => {
@@ -40,7 +44,6 @@ export default function ViniloDetalle() {
   }, [vinilo]);
 
   const añadirAlCarrito = () => {
-    const usuario = JSON.parse(localStorage.getItem("usuario"));
     if (!usuario) {
       alert("Debes iniciar sesión para añadir al carrito.");
       return;
@@ -76,7 +79,6 @@ export default function ViniloDetalle() {
   };
 
   const enviarComentario = async () => {
-    const usuario = JSON.parse(localStorage.getItem("usuario"));
     if (!usuario) {
       alert("Debes iniciar sesión para comentar.");
       return;
@@ -110,7 +112,7 @@ export default function ViniloDetalle() {
   };
 
   const eliminarComentario = async (id) => {
-    if (!window.confirm("¿Estás seguro de eliminar tu comentario?")) return;
+    if (!window.confirm("¿Estás seguro de eliminar este comentario?")) return;
 
     const res = await fetch(`http://localhost:8000/api/valoraciones/${id}`, {
       method: "DELETE",
@@ -132,8 +134,7 @@ export default function ViniloDetalle() {
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${localStorage.getItem("token")}`,
-      },
-      body: JSON.stringify({ comentario: comentarioEditado }),
+      }
     });
 
     if (res.ok) {
@@ -146,11 +147,7 @@ export default function ViniloDetalle() {
     }
   };
 
-  if (!vinilo) {
-    return <div className="p-8 text-gray-600">Cargando vinilo...</div>;
-  }
-
-  const usuarioId = JSON.parse(localStorage.getItem("usuario"))?.id;
+  if (!vinilo) return <div className="p-8 text-gray-600">Cargando vinilo...</div>;
 
   return (
     <div className="min-h-screen bg-white pt-24 px-6">
@@ -222,7 +219,7 @@ export default function ViniloDetalle() {
           ) : (
             <ul className="space-y-4">
               {valoraciones.map((val) => {
-                const esDelUsuario = val.usuario_id === usuarioId;
+                const puedeGestionar = val.usuario_id === usuarioId || isAdmin;
                 return (
                   <li key={val.id} className="bg-gray-50 p-4 rounded shadow">
                     <div className="flex justify-between items-center">
@@ -230,7 +227,7 @@ export default function ViniloDetalle() {
                         <strong>{val.usuario?.nombre || "Usuario"}:</strong>{" "}
                         {new Date(val.fecha_valoracion).toLocaleDateString()}
                       </p>
-                      {esDelUsuario && (
+                      {puedeGestionar && (
                         <div className="flex gap-2">
                           <button
                             onClick={() => {
