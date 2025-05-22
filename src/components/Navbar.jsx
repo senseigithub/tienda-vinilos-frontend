@@ -84,7 +84,11 @@ export default function Navbar() {
               onClick={() => setSidebarAbierto(true)}
             >
               <span className="text-xl text-gray-700 hover:text-orange-500">
-                <img src="/src/assets/carrito.svg" alt="Carrito" className="w-8 h-8" />
+                <img
+                  src="/src/assets/carrito.svg"
+                  alt="Carrito"
+                  className="w-8 h-8"
+                />
               </span>
               {carritoCount > 0 && (
                 <span className="absolute -top-2 -right-2 bg-orange-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
@@ -133,6 +137,14 @@ export default function Navbar() {
                     >
                       Mis pedidos
                     </Link>
+                    {usuario?.rol === "admin" && (
+                      <Link
+                        to="/admin"
+                        className="block px-4 py-2 text-sm text-black hover:bg-gray-100"
+                      >
+                      Panel de administración
+                      </Link>
+                    )}
                     <button
                       onClick={handleLogout}
                       className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100"

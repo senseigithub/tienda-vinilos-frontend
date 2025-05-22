@@ -8,6 +8,8 @@ import Direcciones from './pages/user/Direcciones';
 import Pedidos from './pages/user/Pedidos';
 import TramitarPedido from './pages/user/TramitarPedido';
 import ViniloDetalle from './pages/public/ViniloDetalle';
+import AdminDashboard from './pages/admin/AdminDashboard';
+import AdminVinilos from './pages/admin/VinilosAdmin';
 
 export default function App() {
   return (
@@ -22,6 +24,9 @@ export default function App() {
         <Route path="/pedidos" element={<Pedidos />} />
         <Route path="/tramitar-pedido" element={<TramitarPedido />} />
         <Route path="/vinilo/:id" element={<ViniloDetalle />} />
+        {/* Rutas de administrador */}
+        <Route path="/admin" element={<AdminDashboard />} />
+        <Route path="/admin/vinilos" element={<AdminVinilos />} />
       </Routes>
     </BrowserRouter>
   );

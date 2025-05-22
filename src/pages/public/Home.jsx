@@ -159,7 +159,7 @@ export default function Home() {
               <label className="block text-black mb-1">Precio mínimo:</label>
               <input
                 type="number"
-                placeholder="Ej. 10"
+                placeholder="Min ."
                 value={filtros.precioMin}
                 onChange={(e) => setFiltros({ ...filtros, precioMin: e.target.value })}
                 className="w-full p-2 border rounded mb-3 text-black"
@@ -167,7 +167,7 @@ export default function Home() {
               <label className="block text-black mb-1">Precio máximo:</label>
               <input
                 type="number"
-                placeholder="Ej. 50"
+                placeholder="Max ."
                 value={filtros.precioMax}
                 onChange={(e) => setFiltros({ ...filtros, precioMax: e.target.value })}
                 className="w-full p-2 border rounded text-black"
