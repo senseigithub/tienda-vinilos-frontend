@@ -28,6 +28,14 @@ export default function AdminDashboard() {
           </li>
           <li>
             <button
+              onClick={() => navigate("/admin/direcciones")}
+              className="w-full text-left bg-orange-100 hover:bg-orange-200 p-4 rounded shadow text-xl font-medium text-black transition"
+            >
+              🏠 Direcciones
+            </button>
+          </li>
+          <li>
+            <button
               onClick={() => navigate("/admin/proveedores")}
               className="w-full text-left bg-orange-100 hover:bg-orange-200 p-4 rounded shadow text-xl font-medium text-black transition"
             >

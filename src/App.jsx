@@ -10,6 +10,9 @@ import TramitarPedido from './pages/user/TramitarPedido';
 import ViniloDetalle from './pages/public/ViniloDetalle';
 import AdminDashboard from './pages/admin/AdminDashboard';
 import AdminVinilos from './pages/admin/VinilosAdmin';
+import AdminUsuarios from './pages/admin/AdminUsuarios';
+import AdminDirecciones from './pages/admin/AdminDirecciones';
+import AdminPedidos from './pages/admin/AdminPedidos';
 
 export default function App() {
   return (
@@ -27,6 +30,9 @@ export default function App() {
         {/* Rutas de administrador */}
         <Route path="/admin" element={<AdminDashboard />} />
         <Route path="/admin/vinilos" element={<AdminVinilos />} />
+        <Route path='/admin/usuarios' element={<AdminUsuarios />} />
+        <Route path="/admin/direcciones" element={<AdminDirecciones />} />
+        <Route path="/admin/pedidos" element={<AdminPedidos />} />
       </Routes>
     </BrowserRouter>
   );
