@@ -1,4 +1,3 @@
-// Pedidos mejorado: muestra dirección, método de pago, botones condicionales y fondo blanco
 import { useEffect, useState } from 'react';
 
 export default function Pedidos() {
@@ -9,9 +8,7 @@ export default function Pedidos() {
     const usuario = JSON.parse(localStorage.getItem('usuario'));
 
     fetch('http://localhost:8000/api/pedidos', {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
+      headers: { Authorization: `Bearer ${token}` },
     })
       .then((res) => res.json())
       .then(async (data) => {
@@ -19,18 +16,17 @@ export default function Pedidos() {
         const withDetalles = await Promise.all(
           propios.map(async (pedido) => {
             const detallesRes = await fetch(`http://localhost:8000/api/detalles-pedido?pedido_id=${pedido.id}`, {
-              headers: {
-                Authorization: `Bearer ${token}`,
-              },
+              headers: { Authorization: `Bearer ${token}` },
             });
             const detalles = await detallesRes.json();
+
             const direccionRes = await fetch(`http://localhost:8000/api/direcciones-envio/${pedido.direccion_envio_id}`, {
-              headers: {
-                Authorization: `Bearer ${token}`,
-              },
+              headers: { Authorization: `Bearer ${token}` },
             });
             const direccion = await direccionRes.json();
+
             const detallesFiltrados = detalles.filter((d) => d.pedido_id === pedido.id);
+
             return { ...pedido, detalles: detallesFiltrados, direccion };
           })
         );
@@ -56,38 +52,79 @@ export default function Pedidos() {
   };
 
   return (
-    <div className="min-h-screen bg-white p-6 max-w-4xl mx-auto">
-      <h1 className="text-3xl font-bold mb-6 text-black">Mis Pedidos</h1>
+    <div className="min-h-screen bg-white p-6 max-w-5xl mx-auto">
+      <h1 className="text-3xl font-bold mb-8 text-center text-gray-900">🛒 Mis Pedidos</h1>
+
       {pedidos.length === 0 ? (
-        <p className="text-gray-600">No tienes pedidos aún.</p>
+        <p className="text-center text-gray-600">No tienes pedidos aún.</p>
       ) : (
         pedidos.map((pedido) => (
-          <div key={pedido.id} className="mb-6 p-5 bg-white border border-orange-400 rounded-xl shadow">
-            <div className="flex justify-between items-center mb-2">
+          <div
+            key={pedido.id}
+            className="mb-8 p-6 bg-white border-2 border-orange-300 rounded-2xl shadow transition-transform hover:scale-[1.01]"
+          >
+            <div className="flex justify-between items-start mb-4">
               <div>
-                <p className="text-sm text-gray-500">Pedido #{pedido.id}</p>
-                <p className="text-sm text-gray-500">Fecha: {new Date(pedido.fecha_pedido).toLocaleString()}</p>
-                <p className="text-sm text-gray-500">Dirección: {pedido.direccion?.direccion}, {pedido.direccion?.ciudad}</p>
-                <p className="text-sm text-gray-500">Código Postal: {pedido.direccion?.codigo_postal}</p>
-                <p className="text-sm text-gray-500">Teléfono: {pedido.direccion?.telefono}</p>
+                <p className="text-sm text-gray-500 mb-1">
+                  <span className="font-semibold text-black">Pedido #{pedido.id}</span>
+                </p>
+                <p className="text-sm text-gray-600">
+                  Fecha: {new Date(pedido.fecha_pedido).toLocaleString()}
+                </p>
+                <p className="text-sm text-gray-600">
+                  Dirección: {pedido.direccion?.direccion}, {pedido.direccion?.ciudad}
+                </p>
+                <p className="text-sm text-gray-600">
+                  Código Postal: {pedido.direccion?.codigo_postal}
+                </p>
+                <p className="text-sm text-gray-600">
+                  Teléfono: {pedido.direccion?.telefono}
+                </p>
               </div>
-              <span className={`text-sm font-semibold px-3 py-1 rounded-full ${pedido.estado === 'Cancelado' ? 'bg-red-100 text-red-600' : pedido.estado === 'Completado' ? 'bg-green-100 text-green-600' : 'bg-yellow-100 text-yellow-700'}`}>
+              <span
+                className={`text-xs font-semibold px-3 py-1 rounded-full ${
+                  pedido.estado === 'Cancelado'
+                    ? 'bg-red-100 text-red-600'
+                    : pedido.estado === 'Completado'
+                    ? 'bg-green-100 text-green-600'
+                    : 'bg-yellow-100 text-yellow-700'
+                }`}
+              >
                 {pedido.estado}
               </span>
             </div>
-            <p className="text-black font-medium">Total: {Number(pedido.total).toFixed(2)} €</p>
-            <p className="text-black">Método de pago: <span className="font-semibold capitalize">{pedido.metodo_pago || 'No especificado'}</span></p>
+
+            <div className="mb-3">
+              <p className="text-black font-medium text-lg">
+                Total: {Number(pedido.total).toFixed(2)} €
+              </p>
+              <p className="text-gray-700">
+                Método de pago:{' '}
+                <span className="font-semibold capitalize">
+                  {pedido.metodo_pago || 'No especificado'}
+                </span>
+              </p>
+            </div>
 
             {pedido.detalles?.length > 0 && (
               <div className="mt-4">
-                <p className="font-medium mb-2 text-gray-700">Vinilos:</p>
+                <p className="font-medium mb-3 text-gray-800">Detalles del pedido:</p>
                 <ul className="space-y-3">
                   {pedido.detalles.map((detalle) => (
-                    <li key={detalle.id} className="flex items-center gap-4 text-sm text-gray-700">
-                      <img src={detalle.vinilo?.imagen || '/placeholder.png'} alt={detalle.vinilo?.titulo || 'Vinilo'} className="w-12 h-12 object-cover rounded" />
+                    <li
+                      key={detalle.id}
+                      className="flex items-center gap-4 text-sm bg-gray-50 p-3 rounded-md shadow-sm"
+                    >
+                      <img
+                        src={detalle.vinilo?.imagen || '/placeholder.png'}
+                        alt={detalle.vinilo?.titulo || 'Vinilo'}
+                        className="w-14 h-14 object-cover rounded-lg border"
+                      />
                       <div>
-                        <p className="font-semibold">{detalle.vinilo?.titulo || 'Vinilo'}</p>
-                        <p>{detalle.cantidad} × {Number(detalle.precio_unitario).toFixed(2)} €</p>
+                        <p className="font-semibold text-black">{detalle.vinilo?.titulo || 'Vinilo'}</p>
+                        <p className="text-gray-700">
+                          {detalle.cantidad} × {Number(detalle.precio_unitario).toFixed(2)} €
+                        </p>
                       </div>
                     </li>
                   ))}
@@ -96,7 +133,7 @@ export default function Pedidos() {
             )}
 
             {pedido.estado !== 'Cancelado' && pedido.estado !== 'Completado' && (
-              <div className="mt-4 space-x-4">
+              <div className="mt-5 flex gap-4">
                 <button
                   onClick={() => actualizarEstadoPedido(pedido.id, 'Cancelado')}
                   className="px-4 py-2 border-2 border-black bg-red-500 text-white font-semibold rounded-full hover:scale-105 hover:bg-red-600 transition-transform text-sm"

@@ -10,6 +10,9 @@ export default function ViniloDetalle() {
   const [editandoId, setEditandoId] = useState(null);
   const [comentarioEditado, setComentarioEditado] = useState("");
 
+  const [modalAbierto, setModalAbierto] = useState(false);
+  const [indiceImagen, setIndiceImagen] = useState(0); // carrusel: índice actual
+
   const usuario = JSON.parse(localStorage.getItem("usuario"));
   const usuarioId = usuario?.id;
   const isAdmin = usuario?.rol === "admin";
@@ -20,7 +23,13 @@ export default function ViniloDetalle() {
         if (!res.ok) throw new Error("No encontrado");
         return res.json();
       })
-      .then(setVinilo)
+      .then((data) => {
+        // asegúrate de tener un array de imágenes
+        setVinilo({
+          ...data,
+          imagenes: data.imagenes || [data.imagen], // si solo hay una, lo mete como array
+        });
+      })
       .catch((err) => {
         console.error("Error al cargar vinilo:", err);
         alert("No se pudo cargar el vinilo.");
@@ -30,9 +39,7 @@ export default function ViniloDetalle() {
   useEffect(() => {
     if (vinilo?.id) {
       fetch(`http://localhost:8000/api/valoraciones?vinilo_id=${vinilo.id}`, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
+        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
       })
         .then((res) => res.json())
         .then((data) => {
@@ -48,21 +55,18 @@ export default function ViniloDetalle() {
       alert("Debes iniciar sesión para añadir al carrito.");
       return;
     }
-
     let carrito = [];
     try {
       carrito = usuario.carrito ? JSON.parse(usuario.carrito) : [];
     } catch {
       carrito = [];
     }
-
     const existente = carrito.find((v) => v.id === vinilo.id);
     if (existente) {
       existente.cantidad += cantidad;
     } else {
       carrito.push({ ...vinilo, cantidad });
     }
-
     fetch(`http://localhost:8000/api/usuarios/${usuario.id}`, {
       method: "PUT",
       headers: {
@@ -83,16 +87,13 @@ export default function ViniloDetalle() {
       alert("Debes iniciar sesión para comentar.");
       return;
     }
-
     if (!comentario.trim()) return alert("Comentario vacío");
-
     const nuevaValoracion = {
       usuario_id: usuario.id,
       vinilo_id: vinilo.id,
       comentario,
       fecha_valoracion: new Date().toISOString(),
     };
-
     const res = await fetch("http://localhost:8000/api/valoraciones", {
       method: "POST",
       headers: {
@@ -101,7 +102,6 @@ export default function ViniloDetalle() {
       },
       body: JSON.stringify(nuevaValoracion),
     });
-
     if (res.ok) {
       const nueva = await res.json();
       setValoraciones([...valoraciones, nueva]);
@@ -113,14 +113,10 @@ export default function ViniloDetalle() {
 
   const eliminarComentario = async (id) => {
     if (!window.confirm("¿Estás seguro de eliminar este comentario?")) return;
-
     const res = await fetch(`http://localhost:8000/api/valoraciones/${id}`, {
       method: "DELETE",
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem("token")}`,
-      },
+      headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
     });
-
     if (res.ok) {
       setValoraciones(valoraciones.filter((v) => v.id !== id));
     } else {
@@ -129,21 +125,26 @@ export default function ViniloDetalle() {
   };
 
   const guardarEdicion = async (id) => {
+    if (!comentarioEditado.trim()) {
+      alert("Comentario vacío");
+      return;
+    }
     const res = await fetch(`http://localhost:8000/api/valoraciones/${id}`, {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
+        Accept: "application/json",
         Authorization: `Bearer ${localStorage.getItem("token")}`,
-      }
+      },
+      body: JSON.stringify({ comentario: comentarioEditado }),
     });
-
+    const data = await res.json();
     if (res.ok) {
-      const actualizado = await res.json();
-      setValoraciones(valoraciones.map((v) => (v.id === id ? actualizado : v)));
+      setValoraciones((prev) => prev.map((v) => (v.id === id ? data : v)));
       setEditandoId(null);
       setComentarioEditado("");
     } else {
-      alert("No se pudo guardar el cambio");
+      alert(data.error || "No se pudo guardar el cambio");
     }
   };
 
@@ -152,11 +153,13 @@ export default function ViniloDetalle() {
   return (
     <div className="min-h-screen bg-white pt-24 px-6">
       <div className="max-w-6xl mx-auto flex flex-col md:flex-row gap-12">
+        {/* Imagen principal con clic para abrir modal */}
         <div className="w-full md:w-1/2">
           <img
-            src={vinilo.imagen}
+            src={vinilo.imagenes[indiceImagen]}
             alt={vinilo.titulo}
-            className="w-full h-auto rounded-xl shadow-lg"
+            className="w-full h-auto rounded-xl shadow-lg cursor-pointer object-contain"
+            onClick={() => setModalAbierto(true)}
           />
         </div>
 
@@ -191,11 +194,7 @@ export default function ViniloDetalle() {
             onClick={añadirAlCarrito}
             className="mt-6 px-6 py-2 border-2 border-black bg-black text-white font-medium rounded-md hover:bg-[#FFA500] hover:text-black transition-all flex items-center justify-center gap-2"
           >
-            <img
-              src="/src/assets/carrito.svg"
-              alt="Carrito"
-              className="w-4 h-4"
-            />
+            <img src="/src/assets/carrito.svg" alt="Carrito" className="w-4 h-4" />
             Agregar al carrito
           </button>
 
@@ -207,12 +206,66 @@ export default function ViniloDetalle() {
         </div>
       </div>
 
+      {/* Modal carrusel */}
+      {modalAbierto && (
+        <div
+          className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 animate-fadeZoom"
+          onClick={() => setModalAbierto(false)}
+        >
+          <div className="relative max-w-4xl w-full flex items-center justify-center" onClick={(e) => e.stopPropagation()}>
+            <button
+              className="absolute top-4 right-4 text-white text-3xl font-bold"
+              onClick={() => setModalAbierto(false)}
+            >
+              ✕
+            </button>
+            {vinilo.imagenes.length > 1 && (
+              <>
+                <button
+                  className="absolute left-2 text-white text-4xl font-bold"
+                  onClick={() =>
+                    setIndiceImagen((prev) =>
+                      prev === 0 ? vinilo.imagenes.length - 1 : prev - 1
+                    )
+                  }
+                >
+                  ‹
+                </button>
+                <button
+                  className="absolute right-2 text-white text-4xl font-bold"
+                  onClick={() =>
+                    setIndiceImagen((prev) =>
+                      prev === vinilo.imagenes.length - 1 ? 0 : prev + 1
+                    )
+                  }
+                >
+                  ›
+                </button>
+              </>
+            )}
+            <img
+              src={vinilo.imagenes[indiceImagen]}
+              alt={`Imagen ${indiceImagen + 1}`}
+              className="max-h-[90vh] w-auto rounded shadow-xl object-contain"
+            />
+          </div>
+        </div>
+      )}
+
+      {/* Animación CSS */}
+      <style>{`
+        @keyframes fadeZoom {
+          from { opacity: 0; transform: scale(0.9); }
+          to { opacity: 1; transform: scale(1); }
+        }
+        .animate-fadeZoom {
+          animation: fadeZoom 0.3s ease-out forwards;
+        }
+      `}</style>
+
       {/* Comentarios */}
       <div className="max-w-4xl mx-auto mt-12">
-        <h2 className="text-2xl font-semibold text-gray-800 mb-4">
-          Comentarios
-        </h2>
-
+        <h2 className="text-2xl font-semibold text-gray-800 mb-4">Comentarios</h2>
         <div className="mb-8">
           {valoraciones.length === 0 ? (
             <p className="text-gray-500">Aún no hay comentarios.</p>
@@ -272,6 +325,7 @@ export default function ViniloDetalle() {
           )}
         </div>
 
+        {/* Formulario nuevo comentario */}
         <div className="p-4 border rounded shadow bg-white">
           <h3 className="text-lg text-black font-semibold mb-2">
             Escribe tu comentario

@@ -13,6 +13,7 @@ import AdminVinilos from './pages/admin/VinilosAdmin';
 import AdminUsuarios from './pages/admin/AdminUsuarios';
 import AdminDirecciones from './pages/admin/AdminDirecciones';
 import AdminPedidos from './pages/admin/AdminPedidos';
+import AdminProveedores from './pages/admin/AdminProveedores';
 
 export default function App() {
   return (
@@ -33,6 +34,7 @@ export default function App() {
         <Route path='/admin/usuarios' element={<AdminUsuarios />} />
         <Route path="/admin/direcciones" element={<AdminDirecciones />} />
         <Route path="/admin/pedidos" element={<AdminPedidos />} />
+        <Route path="/admin/proveedores" element={<AdminProveedores />} />
       </Routes>
     </BrowserRouter>
   );

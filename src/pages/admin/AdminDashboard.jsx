@@ -1,56 +1,41 @@
 import { useNavigate } from "react-router-dom";
+import logo from "../../assets/logo.png";
 
 export default function AdminDashboard() {
   const navigate = useNavigate();
 
+  const panels = [
+    { label: "🎵 Vinilos", path: "/admin/vinilos" },
+    { label: "👥 Usuarios", path: "/admin/usuarios" },
+    { label: "🏠 Direcciones", path: "/admin/direcciones" },
+    { label: "🏢 Proveedores", path: "/admin/proveedores" },
+    { label: "📦 Pedidos", path: "/admin/pedidos" },
+  ];
+
   return (
-    <div className="min-h-screen bg-white pt-24 px-6">
-      <div className="max-w-4xl mx-auto">
-        <h1 className="text-3xl font-bold text-gray-800 mb-8 text-center">
+    <div className="min-h-screen bg-orange-50 p-6">
+      <div className="max-w-6xl mx-auto">
+        <div className="flex justify-center mb-6">
+          <img src={logo} alt="Logo" className="w-40 h-auto" />
+        </div>
+        <h1 className="text-4xl font-bold text-center text-black mb-10 border-b-4 border-[#FFA500] pb-4">
           Panel de Administración
         </h1>
-        <ul className="space-y-4">
-          <li>
-            <button
-              onClick={() => navigate("/admin/vinilos")}
-              className="w-full text-left bg-orange-100 hover:bg-orange-200 p-4 rounded shadow text-xl font-medium text-black transition"
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          {panels.map((item) => (
+            <div
+              key={item.path}
+              onClick={() => navigate(item.path)}
+              className="cursor-pointer bg-white border-2 border-orange-300 rounded-lg shadow hover:shadow-lg transform hover:-translate-y-1 transition-all p-6 flex flex-col items-center justify-center"
             >
-              🎵 Vinilos
-            </button>
-          </li>
-          <li>
-            <button
-              onClick={() => navigate("/admin/usuarios")}
-              className="w-full text-left bg-orange-100 hover:bg-orange-200 p-4 rounded shadow text-xl font-medium text-black transition"
-            >
-              👥 Usuarios
-            </button>
-          </li>
-          <li>
-            <button
-              onClick={() => navigate("/admin/direcciones")}
-              className="w-full text-left bg-orange-100 hover:bg-orange-200 p-4 rounded shadow text-xl font-medium text-black transition"
-            >
-              🏠 Direcciones
-            </button>
-          </li>
-          <li>
-            <button
-              onClick={() => navigate("/admin/proveedores")}
-              className="w-full text-left bg-orange-100 hover:bg-orange-200 p-4 rounded shadow text-xl font-medium text-black transition"
-            >
-              🏢 Proveedores
-            </button>
-          </li>
-          <li>
-            <button
-              onClick={() => navigate("/admin/pedidos")}
-              className="w-full text-left bg-orange-100 hover:bg-orange-200 p-4 rounded shadow text-xl font-medium text-black transition"
-            >
-              📦 Pedidos
-            </button>
-          </li>
-        </ul>
+              <span className="text-5xl mb-4">{item.label.split(" ")[0]}</span>
+              <span className="text-xl font-semibold text-black text-center">
+                {item.label.split(" ").slice(1).join(" ")}
+              </span>
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   );

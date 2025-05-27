@@ -34,25 +34,24 @@ export default function AdminPedidos() {
   };
 
   const eliminarPedido = async (id) => {
-  const res = await fetch(`http://localhost:8000/api/pedidos/${id}`, {
-    method: "DELETE",
-    headers: {
-      Authorization: `Bearer ${localStorage.getItem("token")}`,
-    },
-  });
+    const res = await fetch(`http://localhost:8000/api/pedidos/${id}`, {
+      method: "DELETE",
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("token")}`,
+      },
+    });
 
-  if (res.ok) {
-    setPedidos(pedidos.filter((p) => p.id !== id));
-  } else {
-    alert("Error al eliminar el pedido.");
-  }
-};
-
+    if (res.ok) {
+      setPedidos(pedidos.filter((p) => p.id !== id));
+    } else {
+      alert("Error al eliminar el pedido.");
+    }
+  };
 
   const estados = ["Pendiente", "Completado", "Cancelado"];
 
   const pedidosFiltrados = pedidos.filter((p) =>
-    p.usuario?.nombre?.toLowerCase().includes(busqueda.toLowerCase())
+    `${p.usuario?.nombre} ${p.usuario?.apellidos}`.toLowerCase().includes(busqueda.toLowerCase())
   );
 
   return (
@@ -61,44 +60,46 @@ export default function AdminPedidos() {
         <div className="flex justify-center mb-6">
           <img src={logo} alt="Logo" className="w-40 h-auto" />
         </div>
-        <h1 className="text-3xl font-bold text-center mb-8 text-gray-900">
+        <h1 className="text-3xl font-bold text-center mb-6 text-gray-900">
           Administración de Pedidos
         </h1>
 
-        <div className="flex justify-end mb-4">
+        <div className="mb-4 flex justify-end">
           <input
             type="text"
             placeholder="Buscar por usuario..."
             value={busqueda}
             onChange={(e) => setBusqueda(e.target.value)}
-            className="p-2 border border-gray-300 rounded text-black"
+            className="px-4 py-2 border border-gray-300 rounded text-black w-full sm:w-96"
           />
         </div>
 
-        <div className="overflow-x-auto rounded-lg shadow">
-          <table className="min-w-full bg-white text-black border border-gray-200">
-            <thead>
-              <tr className="bg-[#FFA500] text-black">
-                <th className="px-4 py-2 border">ID</th>
-                <th className="px-4 py-2 border">Usuario</th>
-                <th className="px-4 py-2 border">Fecha</th>
-                <th className="px-4 py-2 border">Total</th>
-                <th className="px-4 py-2 border">Método Pago</th>
-                <th className="px-4 py-2 border">Estado</th>
-                <th className="px-4 py-2 border">Acciones</th>
+        <div className="overflow-x-auto rounded shadow border">
+          <table className="min-w-full text-sm text-left text-gray-700">
+            <thead className="bg-orange-100 text-black">
+              <tr>
+                <th className="px-6 py-3">ID</th>
+                <th className="px-6 py-3">Usuario</th>
+                <th className="px-6 py-3">Fecha</th>
+                <th className="px-6 py-3">Total</th>
+                <th className="px-6 py-3">Método Pago</th>
+                <th className="px-6 py-3">Estado</th>
+                <th className="px-6 py-3 text-center">Acciones</th>
               </tr>
             </thead>
             <tbody>
               {pedidosFiltrados.map((p) => (
-                <tr key={p.id} className="hover:bg-gray-50 transition">
-                  <td className="px-4 py-2 border text-center">{p.id}</td>
-                  <td className="px-4 py-2 border">
+                <tr key={p.id} className="border-t hover:bg-gray-50">
+                  <td className="px-6 py-4">{p.id}</td>
+                  <td className="px-6 py-4">
                     {p.usuario?.nombre} {p.usuario?.apellidos}
                   </td>
-                  <td className="px-4 py-2 border">{new Date(p.fecha_pedido).toLocaleString()}</td>
-                  <td className="px-4 py-2 border">{p.total} €</td>
-                  <td className="px-4 py-2 border">{p.metodo_pago}</td>
-                  <td className="px-4 py-2 border">
+                  <td className="px-6 py-4">
+                    {new Date(p.fecha_pedido).toLocaleString()}
+                  </td>
+                  <td className="px-6 py-4">{p.total} €</td>
+                  <td className="px-6 py-4">{p.metodo_pago}</td>
+                  <td className="px-6 py-4">
                     <select
                       value={p.estado}
                       onChange={(e) => actualizarEstado(p.id, e.target.value)}
@@ -111,10 +112,10 @@ export default function AdminPedidos() {
                       ))}
                     </select>
                   </td>
-                  <td className="px-4 py-2 border text-center">
+                  <td className="px-6 py-4 flex justify-center">
                     <button
                       onClick={() => eliminarPedido(p.id)}
-                      className="px-3 py-1 bg-red-600 text-white border-2 border-black rounded hover:bg-red-700 text-sm"
+                      className="px-3 py-1 bg-red-600 text-white font-medium border-2 border-black rounded hover:bg-red-700 text-sm"
                     >
                       Eliminar
                     </button>
@@ -123,7 +124,7 @@ export default function AdminPedidos() {
               ))}
               {pedidosFiltrados.length === 0 && (
                 <tr>
-                  <td colSpan="7" className="px-4 py-6 text-center text-gray-500">
+                  <td colSpan="7" className="px-6 py-6 text-center text-gray-500">
                     No se encontraron pedidos.
                   </td>
                 </tr>
