@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 
 export default function Pedidos() {
   const [pedidos, setPedidos] = useState([]);
+  const [cargando, setCargando] = useState(true); // NUEVO estado para saber si está cargando
 
   useEffect(() => {
     const token = localStorage.getItem('token');
@@ -31,7 +32,8 @@ export default function Pedidos() {
           })
         );
         setPedidos(withDetalles);
-      });
+      })
+      .finally(() => setCargando(false)); // AL FINAL, desactivamos el cargando
   }, []);
 
   const actualizarEstadoPedido = async (pedidoId, nuevoEstado) => {
@@ -55,7 +57,12 @@ export default function Pedidos() {
     <div className="min-h-screen bg-white p-6 max-w-5xl mx-auto">
       <h1 className="text-3xl font-bold mb-8 text-center text-gray-900">🛒 Mis Pedidos</h1>
 
-      {pedidos.length === 0 ? (
+      {/* ANIMACIÓN DE CARGA */}
+      {cargando ? (
+        <div className="flex justify-center items-center h-60">
+          <div className="w-12 h-12 border-4 border-orange-400 border-t-transparent rounded-full animate-spin"></div>
+        </div>
+      ) : pedidos.length === 0 ? (
         <p className="text-center text-gray-600">No tienes pedidos aún.</p>
       ) : (
         pedidos.map((pedido) => (
@@ -121,7 +128,9 @@ export default function Pedidos() {
                         className="w-14 h-14 object-cover rounded-lg border"
                       />
                       <div>
-                        <p className="font-semibold text-black">{detalle.vinilo?.titulo || 'Vinilo'}</p>
+                        <p className="font-semibold text-black">
+                          {detalle.vinilo?.titulo || 'Vinilo'}
+                        </p>
                         <p className="text-gray-700">
                           {detalle.cantidad} × {Number(detalle.precio_unitario).toFixed(2)} €
                         </p>

@@ -57,28 +57,29 @@ export default function Home() {
   };
 
   const añadirAlCarrito = (vinilo) => {
-    const usuario = JSON.parse(localStorage.getItem('usuario'));
-    if (!usuario) return alert('Debes iniciar sesión');
+  const usuario = JSON.parse(localStorage.getItem('usuario'));
+  if (!usuario) return alert('Debes iniciar sesión');
 
-    let carrito = usuario.carrito ? JSON.parse(usuario.carrito) : [];
-    const existente = carrito.find(v => v.id === vinilo.id);
-    if (existente) existente.cantidad += 1;
-    else carrito.push({ ...vinilo, cantidad: 1 });
+  let carrito = usuario.carrito ? JSON.parse(usuario.carrito) : [];
+  const existente = carrito.find(v => v.id === vinilo.id);
+  if (existente) existente.cantidad += 1;
+  else carrito.push({ ...vinilo, cantidad: 1 });
 
-    fetch(`http://localhost:8000/api/usuarios/${usuario.id}`, {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${localStorage.getItem('token')}`,
-      },
-      body: JSON.stringify({ carrito: JSON.stringify(carrito) }),
-    })
-      .then(res => res.json())
-      .then(data => {
-        localStorage.setItem('usuario', JSON.stringify(data));
-        alert('Producto añadido al carrito');
-      });
-  };
+  fetch(`http://localhost:8000/api/usuarios/${usuario.id}`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${localStorage.getItem('token')}`,
+    },
+    body: JSON.stringify({ carrito: JSON.stringify(carrito) }),
+  })
+    .then(res => res.json())
+    .then(data => {
+      localStorage.setItem('usuario', JSON.stringify(data));
+      window.location.reload();  // 👈 recarga la página entera
+    });
+};
+
 
   const artistas = vinilos.reduce((acc, v) => {
     acc[v.artista] = (acc[v.artista] || 0) + 1;
