@@ -11,7 +11,8 @@ export default function ViniloDetalle() {
   const [comentarioEditado, setComentarioEditado] = useState("");
 
   const [modalAbierto, setModalAbierto] = useState(false);
-  const [indiceImagen, setIndiceImagen] = useState(0); // carrusel: índice actual
+  const [indiceImagen, setIndiceImagen] = useState(0);
+  const [mostrarDescripcionCompleta, setMostrarDescripcionCompleta] = useState(false);
 
   const usuario = JSON.parse(localStorage.getItem("usuario"));
   const usuarioId = usuario?.id;
@@ -24,10 +25,9 @@ export default function ViniloDetalle() {
         return res.json();
       })
       .then((data) => {
-        // asegúrate de tener un array de imágenes
         setVinilo({
           ...data,
-          imagenes: data.imagenes || [data.imagen], // si solo hay una, lo mete como array
+          imagenes: data.imagenes || [data.imagen],
         });
       })
       .catch((err) => {
@@ -78,7 +78,7 @@ export default function ViniloDetalle() {
       .then((res) => res.json())
       .then((actualizado) => {
         localStorage.setItem("usuario", JSON.stringify(actualizado));
-        alert("Producto añadido al carrito");
+        window.location.reload();
       });
   };
 
@@ -153,12 +153,12 @@ export default function ViniloDetalle() {
   return (
     <div className="min-h-screen bg-white pt-24 px-6">
       <div className="max-w-6xl mx-auto flex flex-col md:flex-row gap-12">
-        {/* Imagen principal con clic para abrir modal */}
+        {/* Imagen principal */}
         <div className="w-full md:w-1/2">
           <img
             src={vinilo.imagenes[indiceImagen]}
             alt={vinilo.titulo}
-            className="w-full h-auto rounded-xl shadow-lg cursor-pointer object-contain"
+            className="w-full h-[550px] object-contain rounded-xl shadow-lg cursor-pointer"
             onClick={() => setModalAbierto(true)}
           />
         </div>
@@ -199,9 +199,19 @@ export default function ViniloDetalle() {
           </button>
 
           {vinilo.descripcion && (
-            <p className="mt-6 text-gray-700 leading-relaxed">
-              {vinilo.descripcion}
-            </p>
+            <div className="mt-6 text-gray-700 leading-relaxed">
+              <p className={`${!mostrarDescripcionCompleta ? 'line-clamp-[8]' : ''}`}>
+                {vinilo.descripcion}
+              </p>
+              {vinilo.descripcion.length > 400 && (
+                <button
+                  onClick={() => setMostrarDescripcionCompleta(!mostrarDescripcionCompleta)}
+                  className="mt-2 text-sm text-blue-600 hover:underline"
+                >
+                  {mostrarDescripcionCompleta ? "Ver menos" : "Ver más"}
+                </button>
+              )}
+            </div>
           )}
         </div>
       </div>
@@ -270,13 +280,13 @@ export default function ViniloDetalle() {
           {valoraciones.length === 0 ? (
             <p className="text-gray-500">Aún no hay comentarios.</p>
           ) : (
-            <ul className="space-y-4">
+            <ul className="space-y-6">
               {valoraciones.map((val) => {
                 const puedeGestionar = val.usuario_id === usuarioId || isAdmin;
                 return (
-                  <li key={val.id} className="bg-gray-50 p-4 rounded shadow">
-                    <div className="flex justify-between items-center">
-                      <p className="text-sm text-gray-600">
+                  <li key={val.id} className="bg-white p-4 rounded-xl shadow border border-gray-200">
+                    <div className="flex justify-between items-start mb-2">
+                      <p className="text-sm text-gray-500">
                         <strong>{val.usuario?.nombre || "Usuario"}:</strong>{" "}
                         {new Date(val.fecha_valoracion).toLocaleDateString()}
                       </p>
@@ -287,13 +297,13 @@ export default function ViniloDetalle() {
                               setEditandoId(val.id);
                               setComentarioEditado(val.comentario);
                             }}
-                            className="px-3 py-1 text-sm font-medium text-black border-2 border-black rounded-full bg-[#FFA500] hover:bg-gray-100 transition"
+                            className="px-3 py-1 text-sm font-medium text-black border border-black rounded-full bg-[#FFA500] hover:bg-orange-300 transition"
                           >
                             Editar
                           </button>
                           <button
                             onClick={() => eliminarComentario(val.id)}
-                            className="px-3 py-1 text-sm font-medium text-black border-2 border-black rounded-full bg-red-600 hover:bg-red-700 transition"
+                            className="px-3 py-1 text-sm font-medium text-white bg-red-600 rounded-full hover:bg-red-700 transition"
                           >
                             Eliminar
                           </button>
@@ -316,7 +326,7 @@ export default function ViniloDetalle() {
                         </button>
                       </div>
                     ) : (
-                      <p className="text-gray-800 mt-1">{val.comentario}</p>
+                      <p className="text-gray-800">{val.comentario}</p>
                     )}
                   </li>
                 );
@@ -325,7 +335,6 @@ export default function ViniloDetalle() {
           )}
         </div>
 
-        {/* Formulario nuevo comentario */}
         <div className="p-4 border rounded shadow bg-white">
           <h3 className="text-lg text-black font-semibold mb-2">
             Escribe tu comentario

@@ -15,13 +15,14 @@ import AdminDirecciones from "./pages/admin/AdminDirecciones";
 import AdminPedidos from "./pages/admin/AdminPedidos";
 import AdminProveedores from "./pages/admin/AdminProveedores";
 import AdminRoute from "./components/AdminRoute";
+import Footer from "./components/Footer";
 
 export default function App() {
   return (
     <BrowserRouter>
       <Navbar />
       <Routes>
-        <Route path="/" element={<Home />} />
+        <Route path="/" element={<><Home /><Footer /></>} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         <Route path="/perfil" element={<Perfil />} />

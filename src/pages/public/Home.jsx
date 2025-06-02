@@ -8,6 +8,8 @@ export default function Home() {
   const [sidebarAbierto, setSidebarAbierto] = useState(false);
   const [mostrarArtistas, setMostrarArtistas] = useState(false);
   const [mostrarGeneros, setMostrarGeneros] = useState(false);
+  const [paginaActual, setPaginaActual] = useState(1);
+  const vinilosPorPagina = 8;
 
   const location = useLocation();
   const navigate = useNavigate();
@@ -22,6 +24,7 @@ export default function Home() {
       .then(data => {
         setVinilos(data);
         setFiltrados(data);
+        setPaginaActual(1); // Reinicia a página 1 al filtrar
       });
   }, [location]);
 
@@ -48,38 +51,39 @@ export default function Home() {
     if (filtros.precioMin) resultado = resultado.filter(v => v.precio >= parseFloat(filtros.precioMin));
     if (filtros.precioMax) resultado = resultado.filter(v => v.precio <= parseFloat(filtros.precioMax));
     setFiltrados(resultado);
+    setPaginaActual(1);
     setSidebarAbierto(false);
   };
 
   const limpiarFiltros = () => {
     setFiltros({ artista: '', genero: '', precioMin: '', precioMax: '' });
     setFiltrados(vinilos);
+    setPaginaActual(1);
   };
 
   const añadirAlCarrito = (vinilo) => {
-  const usuario = JSON.parse(localStorage.getItem('usuario'));
-  if (!usuario) return alert('Debes iniciar sesión');
+    const usuario = JSON.parse(localStorage.getItem('usuario'));
+    if (!usuario) return alert('Debes iniciar sesión');
 
-  let carrito = usuario.carrito ? JSON.parse(usuario.carrito) : [];
-  const existente = carrito.find(v => v.id === vinilo.id);
-  if (existente) existente.cantidad += 1;
-  else carrito.push({ ...vinilo, cantidad: 1 });
+    let carrito = usuario.carrito ? JSON.parse(usuario.carrito) : [];
+    const existente = carrito.find(v => v.id === vinilo.id);
+    if (existente) existente.cantidad += 1;
+    else carrito.push({ ...vinilo, cantidad: 1 });
 
-  fetch(`http://localhost:8000/api/usuarios/${usuario.id}`, {
-    method: 'PUT',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${localStorage.getItem('token')}`,
-    },
-    body: JSON.stringify({ carrito: JSON.stringify(carrito) }),
-  })
-    .then(res => res.json())
-    .then(data => {
-      localStorage.setItem('usuario', JSON.stringify(data));
-      window.location.reload();  // 👈 recarga la página entera
-    });
-};
-
+    fetch(`http://localhost:8000/api/usuarios/${usuario.id}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${localStorage.getItem('token')}`,
+      },
+      body: JSON.stringify({ carrito: JSON.stringify(carrito) }),
+    })
+      .then(res => res.json())
+      .then(data => {
+        localStorage.setItem('usuario', JSON.stringify(data));
+        window.location.reload();
+      });
+  };
 
   const artistas = vinilos.reduce((acc, v) => {
     acc[v.artista] = (acc[v.artista] || 0) + 1;
@@ -90,6 +94,10 @@ export default function Home() {
     acc[v.genero] = (acc[v.genero] || 0) + 1;
     return acc;
   }, {});
+
+  const indexInicio = (paginaActual - 1) * vinilosPorPagina;
+  const vinilosPagina = filtrados.slice(indexInicio, indexInicio + vinilosPorPagina);
+  const totalPaginas = Math.ceil(filtrados.length / vinilosPorPagina);
 
   return (
     <section className="bg-white min-h-screen pt-24 px-6 relative">
@@ -113,7 +121,6 @@ export default function Home() {
           >
             <h3 className="text-xl font-bold text-black mb-4">Filtrar vinilos</h3>
 
-            {/* Artistas */}
             <div className="mb-4">
               <button onClick={() => setMostrarArtistas(!mostrarArtistas)} className="font-medium text-black w-full text-left">
                 Artistas
@@ -134,7 +141,6 @@ export default function Home() {
               )}
             </div>
 
-            {/* Géneros */}
             <div className="mb-4">
               <button onClick={() => setMostrarGeneros(!mostrarGeneros)} className="font-medium text-black w-full text-left">
                 Géneros
@@ -155,12 +161,11 @@ export default function Home() {
               )}
             </div>
 
-            {/* Precio */}
             <div className="mb-6">
               <label className="block text-black mb-1">Precio mínimo:</label>
               <input
                 type="number"
-                placeholder="Min ."
+                placeholder="Min."
                 value={filtros.precioMin}
                 onChange={(e) => setFiltros({ ...filtros, precioMin: e.target.value })}
                 className="w-full p-2 border rounded mb-3 text-black"
@@ -168,7 +173,7 @@ export default function Home() {
               <label className="block text-black mb-1">Precio máximo:</label>
               <input
                 type="number"
-                placeholder="Max ."
+                placeholder="Max."
                 value={filtros.precioMax}
                 onChange={(e) => setFiltros({ ...filtros, precioMax: e.target.value })}
                 className="w-full p-2 border rounded text-black"
@@ -176,16 +181,10 @@ export default function Home() {
             </div>
 
             <div className="flex justify-between">
-              <button
-                onClick={aplicarFiltros}
-                className="bg-black text-white px-4 py-2 rounded hover:bg-gray-900"
-              >
+              <button onClick={aplicarFiltros} className="bg-black text-white px-4 py-2 rounded hover:bg-gray-900">
                 Aplicar
               </button>
-              <button
-                onClick={limpiarFiltros}
-                className="text-red-600 hover:underline"
-              >
+              <button onClick={limpiarFiltros} className="text-red-600 hover:underline">
                 Limpiar filtros
               </button>
             </div>
@@ -195,39 +194,57 @@ export default function Home() {
         {filtrados.length === 0 ? (
           <p className="text-gray-500 mt-12">No se encontraron vinilos.</p>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8 mt-6">
-            {filtrados.map((vinilo, i) => (
-              <div
-                key={vinilo.id}
-                className="bg-white rounded-2xl shadow-md overflow-hidden hover:shadow-xl transform hover:-translate-y-1 transition duration-300 ease-in-out animate-fade-in"
-                style={{ animationDelay: `${i * 100}ms`, animationFillMode: 'both' }}
-              >
-                <img
-                  src={vinilo.imagen}
-                  alt={vinilo.titulo}
-                  className="w-full h-48 object-cover cursor-pointer"
-                  onClick={() => navigate(`/vinilo/${vinilo.id}`)}
-                />
-                <div className="p-4">
-                  <h2
-                    className="text-lg font-bold text-gray-900 cursor-pointer hover:underline"
+          <>
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 mt-6">
+              {vinilosPagina.map((vinilo, i) => (
+                <div
+                  key={vinilo.id}
+                  className="bg-white rounded-2xl shadow-md overflow-hidden hover:shadow-xl transform hover:-translate-y-1 transition duration-300 ease-in-out animate-fade-in flex flex-col"
+                  style={{ animationDelay: `${i * 100}ms`, animationFillMode: 'both', height: '100%' }}
+                >
+                  <img
+                    src={vinilo.imagen}
+                    alt={vinilo.titulo}
+                    className="w-full h-48 object-cover cursor-pointer"
                     onClick={() => navigate(`/vinilo/${vinilo.id}`)}
-                  >
-                    {vinilo.titulo}
-                  </h2>
-                  <p className="text-sm text-gray-500 mb-1">{vinilo.artista} · {vinilo.genero}</p>
-                  <p className="text-xl font-semibold text-black">{vinilo.precio} €</p>
-                  <button
-                    onClick={() => añadirAlCarrito(vinilo)}
-                    className="mt-3 w-full py-1.5 px-2 text-sm border-2 border-black bg-black text-white font-medium rounded-md hover:bg-[#FFA500] hover:text-black transition-all flex items-center justify-center gap-2"
-                  >
-                    <img src="/src/assets/carrito.svg" alt="Carrito" className="w-4 h-4" />
-                    Añadir al carrito
-                  </button>
+                  />
+                  <div className="p-4 flex flex-col flex-grow">
+                    <h2
+                      className="text-lg font-bold text-gray-900 cursor-pointer hover:underline truncate"
+                      title={vinilo.titulo}
+                      onClick={() => navigate(`/vinilo/${vinilo.id}`)}
+                    >
+                      {vinilo.titulo}
+                    </h2>
+                    <p className="text-sm text-gray-500 mb-1 truncate">{vinilo.artista} · {vinilo.genero}</p>
+                    <p className="text-xl font-semibold text-black">{vinilo.precio} €</p>
+                    <div className="mt-auto">
+                      <button
+                        onClick={() => añadirAlCarrito(vinilo)}
+                        className="mt-3 w-full py-1.5 px-2 text-sm border-2 border-black bg-black text-white font-medium rounded-md hover:bg-[#FFA500] hover:text-black transition-all flex items-center justify-center gap-2"
+                      >
+                        <img src="/src/assets/carrito.svg" alt="Carrito" className="w-4 h-4" />
+                        Añadir al carrito
+                      </button>
+                    </div>
+                  </div>
                 </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+
+            {/* Paginación */}
+            <div className="flex justify-center mt-8 space-x-2">
+              {Array.from({ length: totalPaginas }, (_, i) => (
+                <button
+                  key={i}
+                  onClick={() => setPaginaActual(i + 1)}
+                  className={`px-3 py-1 border rounded ${paginaActual === i + 1 ? 'bg-[#FFA500] text-black' : 'bg-white text-gray-700 hover:bg-gray-100'}`}
+                >
+                  {i + 1}
+                </button>
+              ))}
+            </div>
+          </>
         )}
       </div>
 
